@@ -119,7 +119,7 @@ class GameInfoRepository : RepositoryProvider.DatabaseRepository {
     private class DataAccessTask2(val gameInfoDao: GameInfoDao, val startIndex: Int, val limit: Int, val callback: (result: List<GameInfoModel>) -> Unit) :
             AsyncTask<Void, Void, List<GameInfoModel>>() {
         override fun doInBackground(vararg params: Void?): List<GameInfoModel> {
-            Thread.sleep(2000)
+            Thread.sleep(1000)
             return gameInfoDao.getDataByPage(startIndex.toLong(), limit)
         }
 

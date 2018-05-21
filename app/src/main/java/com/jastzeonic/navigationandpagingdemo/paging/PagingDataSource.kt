@@ -20,8 +20,9 @@ class PagingDataSource(private val lifecycleOwner: LifecycleOwner,
 
         repository.getItemByPage(0, params.requestedLoadSize).observe(lifecycleOwner,
                 Observer {
-                    callback.onResult(it ?: emptyList(), 0, (0 + params.requestedLoadSize))
                     statusCallback.postValue(1)
+                    callback.onResult(it ?: emptyList(), 0, (0 + params.requestedLoadSize))
+
                 })
     }
 

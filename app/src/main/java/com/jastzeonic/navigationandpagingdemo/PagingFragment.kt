@@ -15,7 +15,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.Navigation
-import com.jastzeonic.navigationandpagingdemo.adapter.GameListNormalAdatper
 import com.jastzeonic.navigationandpagingdemo.adapter.GameListPagingAdapter
 import com.jastzeonic.navigationandpagingdemo.database.GameInfoRepository
 import com.jastzeonic.navigationandpagingdemo.database.RepositoryProvider
@@ -26,7 +25,6 @@ class PagingFragment : Fragment() {
 
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var refreshLayout: SwipeRefreshLayout
     private lateinit var pagedList: LiveData<PagedList<GameInfoModel>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,12 +33,13 @@ class PagingFragment : Fragment() {
         val status = MutableLiveData<Int>()
 
         status.observe(this, Observer {
-            refreshLayout.isRefreshing = it == 0
+            (recyclerView.adapter as GameListPagingAdapter).setState(it ?: 1)
 
         })
 
+
         val repository = RepositoryProvider.getDatabaseRepository(GameInfoRepository::class.java)
-        val pageSize = 20
+        val pageSize = 10
 
         val sourceFactory = DataSourceFactory(this, repository, status)
         val pagedListConfig = PagedList.Config.Builder()
@@ -48,7 +47,7 @@ class PagingFragment : Fragment() {
                 .setInitialLoadSizeHint(pageSize * 2)
                 .setPageSize(pageSize)
                 .build()
-        pagedList = LivePagedListBuilder(sourceFactory, pagedListConfig)
+        pagedList = LivePagedListBuilder(sourceFactory, 30)
                 .build()
 
 
@@ -62,7 +61,6 @@ class PagingFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_blank, container, false)
         recyclerView = view.findViewById<RecyclerView>(R.id.gameList)
 
-        refreshLayout = view.findViewById<SwipeRefreshLayout>(R.id.refresh_layout)
 
         recyclerView.layoutManager = LinearLayoutManager(recyclerView.context, LinearLayoutManager.VERTICAL, false)
         recyclerView.adapter = GameListPagingAdapter({ view, url ->

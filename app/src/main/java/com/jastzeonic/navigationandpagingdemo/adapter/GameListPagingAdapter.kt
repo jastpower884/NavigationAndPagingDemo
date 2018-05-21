@@ -11,29 +11,69 @@ import com.bumptech.glide.Glide
 import com.jastzeonic.navigationandpagingdemo.R
 import com.jastzeonic.navigationandpagingdemo.model.GameInfoModel
 import com.jastzeonic.navigationandpagingdemo.view.GameInfoViewHolder
+import com.jastzeonic.navigationandpagingdemo.view.StateItemViewHolder
 
 class GameListPagingAdapter(var clickListener: (view: View, url: String) -> Unit) : PagedListAdapter<GameInfoModel, RecyclerView.ViewHolder>(POST_COMPARATOR) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
-        return GameInfoViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_game_info_view, parent, false), { view, position ->
+        return when (viewType) {
+            R.layout.item_network_state -> StateItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_network_state, parent, false))
+            R.layout.item_game_info_view -> GameInfoViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_game_info_view, parent, false), { view, position ->
+                clickListener(view, getItem(position)?.detailUrl ?: "")
+            })
+            else -> throw IllegalArgumentException("unknown view type $viewType")
+        }
 
-            clickListener(view, getItem(position)?.detailUrl ?: "")
-
-
-        })
     }
 
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val viewHolder = holder as GameInfoViewHolder
+        if (holder is GameInfoViewHolder) {
+            val viewHolder = holder as GameInfoViewHolder
 
-        val item = getItem(position)
+            val item = getItem(position)
 
-        viewHolder.titleText.text = item?.gameTitle
-        viewHolder.firmText.text = item?.firm
-        viewHolder.dataText.text = item?.release_date
-        viewHolder.idText.text = item?.id.toString()
+            viewHolder.titleText.text = item?.gameTitle
+            viewHolder.firmText.text = item?.firm
+            viewHolder.dataText.text = item?.release_date
+            viewHolder.idText.text = item?.id.toString()
+        }
     }
+
+
+    private var state: Int = 1
+
+    fun setState(state: Int) {
+        val previousState = this.state
+        val hadExtraRow = hasExtraRow()
+        this.state = state
+        val hasExtraRow = hasExtraRow()
+        if (hadExtraRow != hasExtraRow) {
+            if (hadExtraRow) {
+                notifyItemRemoved(super.getItemCount())
+            } else {
+                notifyItemInserted(super.getItemCount())
+            }
+        } else if (hasExtraRow && previousState != state) {
+            notifyItemChanged(itemCount - 1)
+        }
+    }
+
+    private fun hasExtraRow() = state == 0
+
+    override fun getItemViewType(position: Int): Int {
+        return if (hasExtraRow() && position == itemCount - 1) {
+            R.layout.item_network_state
+        } else {
+            R.layout.item_game_info_view
+        }
+    }
+
+
+    override fun getItemCount(): Int {
+        return super.getItemCount() + if (hasExtraRow()) 1 else 0
+    }
+
 
 
     companion object {
