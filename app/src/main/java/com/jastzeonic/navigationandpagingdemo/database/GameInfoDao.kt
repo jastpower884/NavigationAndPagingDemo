@@ -10,11 +10,15 @@ interface GameInfoDao {
     fun getAll(): List<GameInfoModel>
 
 
+    @Query("select * from " + GameInfoModel.TABLE_NAME + " Where id > :startIndex LIMIT:limit")
+    fun getDataByPage(startIndex: Long, limit: Int): List<GameInfoModel>
+
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(item: GameInfoModel): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(items:List<GameInfoModel>)
+    fun insert(items: List<GameInfoModel>)
 
     @Update
     fun update(item: GameInfoModel): Int

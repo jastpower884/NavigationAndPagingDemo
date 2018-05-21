@@ -74,24 +74,62 @@ class GameInfoRepository : RepositoryProvider.DatabaseRepository {
 
     fun getAll(): LiveData<List<GameInfoModel>> {
 
-        var liveData = MutableLiveData<List<GameInfoModel>>()
+        val liveData = MutableLiveData<List<GameInfoModel>>()
 
+        DataAccessTask(gameInfoDao, {
 
-        object : AsyncTask<Void, Void, List<GameInfoModel>>() {
-            override fun doInBackground(vararg params: Void?): List<GameInfoModel> {
-                return gameInfoDao.getAll()
-            }
+            liveData.value = it
 
-            override fun onPostExecute(result: List<GameInfoModel>?) {
-                super.onPostExecute(result)
-
-                liveData.value = result
-            }
-        }.execute()
-
+        }).execute()
 
         return liveData
 
     }
+
+
+    fun getItemByPage(startIndex: Int, limit: Int): LiveData<List<GameInfoModel>> {
+
+        val liveData = MutableLiveData<List<GameInfoModel>>()
+
+        DataAccessTask2(gameInfoDao, startIndex, limit, {
+
+            liveData.value = it
+
+        }).execute()
+
+        return liveData
+
+    }
+
+
+    private class DataAccessTask(var gameInfoDao: GameInfoDao, val callback: (result: List<GameInfoModel>) -> Unit) :
+            AsyncTask<Void, Void, List<GameInfoModel>>() {
+        override fun doInBackground(vararg params: Void?): List<GameInfoModel> {
+            return gameInfoDao.getAll()
+        }
+
+        override fun onPostExecute(result: List<GameInfoModel>?) {
+            super.onPostExecute(result)
+            callback(result ?: emptyList())
+
+        }
+
+    }
+
+    private class DataAccessTask2(val gameInfoDao: GameInfoDao, val startIndex: Int, val limit: Int, val callback: (result: List<GameInfoModel>) -> Unit) :
+            AsyncTask<Void, Void, List<GameInfoModel>>() {
+        override fun doInBackground(vararg params: Void?): List<GameInfoModel> {
+            Thread.sleep(2000)
+            return gameInfoDao.getDataByPage(startIndex.toLong(), limit)
+        }
+
+        override fun onPostExecute(result: List<GameInfoModel>?) {
+            super.onPostExecute(result)
+            callback(result ?: emptyList())
+
+        }
+
+    }
+
 
 }

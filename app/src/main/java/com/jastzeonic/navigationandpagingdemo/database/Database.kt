@@ -4,7 +4,7 @@ import android.arch.persistence.room.Database
 import android.arch.persistence.room.RoomDatabase
 import com.jastzeonic.navigationandpagingdemo.model.GameInfoModel
 
-@Database(entities = [(GameInfoModel::class)], version = 1)
+@Database(entities = [(GameInfoModel::class)], version = 1, exportSchema = false )
 abstract class Database : RoomDatabase() {
 
     companion object {
